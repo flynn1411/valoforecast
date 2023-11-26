@@ -4,7 +4,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 function App() {
 
   return (
-    <>
+    <main className="bg-blue-800 w-screen h-screen">
       <BrowserRouter>
         <Routes>
 
@@ -12,7 +12,7 @@ function App() {
 
         </Routes>
       </BrowserRouter>
-    </>
+    </main>
   )
 }
 
