@@ -6,7 +6,7 @@ function MatchForm(){
   function addNewMatch(event: React.FormEvent<HTMLFormElement>){
     event.preventDefault();
 
-    alert("Funcionó");
+    
 
   }
 
@@ -33,7 +33,7 @@ function MatchForm(){
           <input type="number" name="economy" id="economy" className="bg-fondo border-verde border-2 text-verde font-ubuntu text-xl"/>
         </div>
         <div className="col-span-1 grid grid-flow-row pb-3">
-          <label htmlFor="first_blood" className="font-ubuntu text-2xl py-5 font-bold">Primera Sangre</label>
+          <label htmlFor="first_blood" className="font-ubuntu text-2xl py-5 font-bold">Primer Encuentro</label>
           <input type="number" name="first_blood" id="first_blood" className="bg-fondo border-verde border-2 text-verde font-ubuntu text-xl"/>
         </div>
         <div className="col-span-1 grid grid-flow-row pb-3">

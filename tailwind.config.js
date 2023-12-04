@@ -10,6 +10,7 @@ export default {
       texto2: '#201F1F',
       verde: '#5EE790',
       rojo: '#FF4655',
+      header:'#45678a'
 
     },
     fontFamily:{
