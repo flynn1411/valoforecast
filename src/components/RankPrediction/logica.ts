@@ -132,15 +132,16 @@ function calculatePoints(originalInfo: any, points: number[][], actualRank:numbe
   const totalMatches = points.length;
   const totalPoints = points.reduce((acc, row) => acc + row.reduce((accRow, punto) => accRow + punto, 0), 0);
   const meanPoints = totalMatches > 0 ? totalPoints / totalMatches : 0;
-  console.log(totalPoints)
+  
+  // console.log(totalPoints)
 
   const promotionPoints = futureRank - actualRank - actualRankPoints;
 
-  const estimatedMatches = meanPoints > 0 ? Math.ceil(promotionPoints / meanPoints) : 0;
-
+  const estimatedMatches = meanPoints > 0 ? Math.ceil((promotionPoints / meanPoints)*1.50) : 0;
+  
   if (result?.killData) {
     const randomData = generateRandomData(result?.killData, result?.deathData, result?.assistData, result?.econData, result?.firstBloodData, result?.spikeData, result?.defusesData, estimatedMatches);
-
+    
     // predicción
 
     return new MLR(originalInfo, points).predict(randomData);
@@ -150,5 +151,20 @@ function calculatePoints(originalInfo: any, points: number[][], actualRank:numbe
 }
 
 
+function calculateMatches(originalInfo: any, historicPoints: number[][], actualRank:number, actualRankPoints: number, futureRank:number){
+  const predictedPoints = (calculatePoints(originalInfo, historicPoints, actualRank, actualRankPoints, futureRank));
 
-export default calculatePoints;
+  const neededPoints:number = futureRank - actualRank - actualRankPoints ;
+  let sumTotal:number = 0;
+  let matches:number = 0;
+  for (let i in predictedPoints) {
+    sumTotal += parseInt(predictedPoints[i])
+    if (sumTotal>=neededPoints) {
+      matches = parseInt(i)+1;
+      break;
+    }
+  }
+  console.log(predictedPoints);
+  return matches;
+}
+export default calculateMatches;

@@ -1,5 +1,5 @@
 import HomeButton from "../HomeButton";
-import calculatePoints from "./logica";
+import calculateMatches from "./logica";
 
 function RankPrediction(){
   // Ejemplo de uso
@@ -34,12 +34,14 @@ function RankPrediction(){
   // rango deseado
   const futureRank = 200;
   
-  console.log('Predicciones de Puntos para Nuevas Partidas => ', calculatePoints(info, points,actualRank,actualRankPoints,futureRank));
+  const partidas = calculateMatches(info, points,actualRank,actualRankPoints,futureRank);
+  console.log('Cantidad de partidas a jugar => ', partidas);
 
   return(
     <div>
       Rank Prediction
       <HomeButton/>
+      <div>{partidas}</div>
     </div>
   )
 }
