@@ -8,16 +8,15 @@ import { v4 as uuid } from "uuid";
   {kills: 11, deaths: 16, assists: 2, econ: 240, first_bloods: 4, defuses: 3, plants: 3, RR: -11, date: "28/11/2023"}
 ]*/
 
-let listaDePartidas: Partida[] = []
-
-if(localStorage.getItem("MATCHES")){
-  listaDePartidas = JSON.parse(`${localStorage.getItem("MATCHES")}`);
+interface MatchesProps{
+  currentMatches: Partida[],
+  setCurrentMatches(arg0: Partida[]): any
 }
 
-
-function Matches(){
-
-  const [currentMatches] = useState<Partida[]>(listaDePartidas);
+function Matches({
+  currentMatches,
+  setCurrentMatches
+}:MatchesProps){
 
   function getColor(rr:number){
     if (rr >= 0){
@@ -28,6 +27,8 @@ function Matches(){
   }
 
   function renderMatches(){
+    //console.log(listaDePartidas);
+
     return currentMatches.map((cPartida)=>{
       return (
         <tr className={getColor(cPartida.RR)} key={uuid()} >
@@ -86,6 +87,13 @@ function Matches(){
           </tbody>
         </table>
       </div>
+      { currentMatches.length > 0 ? 
+        <button className="bg-verde text-fondo px-6 py-4 mb-6 font-titulo text-xl hover:bg-[#5ee7b2] w-[15vw]" onClick={()=>{
+          localStorage.removeItem("MATCHES");
+          setCurrentMatches([]);
+        }}>
+        Eliminar Históricos
+      </button>: "" }
       <HomeButton/>
     </div>
   );
