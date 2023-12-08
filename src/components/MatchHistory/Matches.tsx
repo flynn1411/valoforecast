@@ -1,28 +1,23 @@
 import { useState } from "react";
 import HomeButton from "../HomeButton";
+import Partida from "../../interfaces/Partida";
+import { v4 as uuid } from "uuid";
 
-interface Partida{
-  kills: number,
-  deaths: number,
-  assists: number,
-  econ: number,
-  first_bloods: number,
-  defuses: number,
-  plants: number,
-  RR: number,
-  date: string
-}
-
-
-let listaDePartidas: Partida[] = [
+/*let listaDePartidas: Partida[] = [
   {kills: 15, deaths: 10, assists: 4, econ: 110, first_bloods: 2, defuses: 1, plants: 4, RR: 21, date: "24/11/2023"},
   {kills: 11, deaths: 16, assists: 2, econ: 240, first_bloods: 4, defuses: 3, plants: 3, RR: -11, date: "28/11/2023"}
-]
+]*/
+
+let listaDePartidas: Partida[] = []
+
+if(localStorage.getItem("MATCHES")){
+  listaDePartidas = JSON.parse(`${localStorage.getItem("MATCHES")}`);
+}
 
 
 function Matches(){
 
-  const [currentMatches, setCurrentMatches] = useState<Partida[]>(listaDePartidas);
+  const [currentMatches] = useState<Partida[]>(listaDePartidas);
 
   function getColor(rr:number){
     if (rr >= 0){
@@ -35,7 +30,7 @@ function Matches(){
   function renderMatches(){
     return currentMatches.map((cPartida)=>{
       return (
-        <tr className={getColor(cPartida.RR)} >
+        <tr className={getColor(cPartida.RR)} key={uuid()} >
           <td><div className="font-medium text-center">{cPartida.date}</div></td>
           <td><div className="font-medium text-center">{cPartida.kills}</div></td>
           <td><div className="font-medium text-center">{cPartida.deaths}</div></td>

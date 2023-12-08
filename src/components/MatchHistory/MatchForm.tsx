@@ -1,12 +1,39 @@
+import { Navigate, useNavigate } from "react-router-dom";
+import Partida from "../../interfaces/Partida";
 import HomeButton from "../HomeButton";
 
 
 function MatchForm(){
+  const navigate = useNavigate();
 
   function addNewMatch(event: React.FormEvent<HTMLFormElement>){
     event.preventDefault();
 
-    
+    let newMatch: Partida = {
+      kills: parseInt(`${event.currentTarget.kills.value}`),
+      deaths: parseInt(`${event.currentTarget.deaths.value}`),
+      assists: parseInt(`${event.currentTarget.assists.value}`),
+      econ: parseInt(`${event.currentTarget.economy.value}`),
+      first_bloods: parseInt(`${event.currentTarget.first_blood.value}`),
+      defuses: parseInt(`${event.currentTarget.defuse.value}`),
+      plants: parseInt(`${event.currentTarget.plants.value}`),
+      RR: parseInt(`${event.currentTarget.rr.value}`),
+      date: `${event.currentTarget.date.value}`
+    }
+
+    let matches: Partida[] = [];
+
+    if(localStorage.getItem("MATCHES")){
+      matches = JSON.parse(localStorage.getItem("MATCHES")!);
+    }
+
+    matches.push(newMatch);
+
+    localStorage.setItem("MATCHES", JSON.stringify(matches));
+
+    alert("¡Partida subida con éxito!");
+
+    navigate("/")
 
   }
 
