@@ -26,13 +26,13 @@ function RankPrediction(){
   ];
 
   //puntos actuales (RR)
-  const actualRankPoints = 48;
+  const actualRankPoints = 90;
 
   // Rango acutal 
   const actualRank = 100;
 
   // rango deseado
-  const futureRank = 200;
+  const futureRank = 300;
   
   const partidas = calculateMatches(info, points,actualRank,actualRankPoints,futureRank);
   console.log('Cantidad de partidas a jugar => ', partidas);
