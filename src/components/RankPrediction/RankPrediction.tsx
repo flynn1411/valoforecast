@@ -24,8 +24,17 @@ function RankPrediction(){
     [-21],
     [15],
   ];
+
+  //puntos actuales (RR)
+  const actualRankPoints = 48;
+
+  // Rango acutal 
+  const actualRank = 100;
+
+  // rango deseado
+  const futureRank = 200;
   
-  console.log('Predicciones de Puntos para Nuevas Partidas => ', calculatePoints(info, points));
+  console.log('Predicciones de Puntos para Nuevas Partidas => ', calculatePoints(info, points,actualRank,actualRankPoints,futureRank));
 
   return(
     <div>

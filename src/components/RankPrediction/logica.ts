@@ -125,12 +125,21 @@ function transformInfo(info: any): any {
   return data;
 }
 
-function calculatePoints(originalInfo: any, points: number[][]): any {
+function calculatePoints(originalInfo: any, points: number[][], actualRank:number, actualRankPoints: number, futureRank:number): any {
   const data = transformInfo(originalInfo)
   const result = calculateMeanStandarDeviation(data);
+  
+  const totalMatches = points.length;
+  const totalPoints = points.reduce((acc, row) => acc + row.reduce((accRow, punto) => accRow + punto, 0), 0);
+  const meanPoints = totalMatches > 0 ? totalPoints / totalMatches : 0;
+  console.log(totalPoints)
+
+  const promotionPoints = futureRank - actualRank - actualRankPoints;
+
+  const estimatedMatches = meanPoints > 0 ? Math.ceil(promotionPoints / meanPoints) : 0;
 
   if (result?.killData) {
-    const randomData = generateRandomData(result?.killData, result?.deathData, result?.assistData, result?.econData, result?.firstBloodData, result?.spikeData, result?.defusesData, data.kill.length);
+    const randomData = generateRandomData(result?.killData, result?.deathData, result?.assistData, result?.econData, result?.firstBloodData, result?.spikeData, result?.defusesData, estimatedMatches);
 
     // predicción
 
