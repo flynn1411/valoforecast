@@ -3,7 +3,7 @@ import * as jStat from 'jstat';
 import MLR from "ml-regression-multivariate-linear";
 
 
-function calculateMeanStandarDeviation(matchData: {
+function calculateMeanStandardDeviation(matchData: {
   kill: number[];
   deaths: number[];
   assists: number[];
@@ -96,7 +96,7 @@ function generateRandomData(
 ): number[][] {
   const generatedData: number[][] = [];
 
-  //const rowNumber = Object.keys();
+
   for (let i = 0; i < rowNumber; i++) {
     const filaGenerada: number[] = [
       Math.abs(Math.round(jStat.normal.inv(Math.random(), killData.killMean, killData.killStandardDeviation))),
@@ -125,13 +125,30 @@ function transformInfo(info: any): any {
   return data;
 }
 
-function calculatePoints(originalInfo: any, points: number[][]): any {
+function calculatePoints(originalInfo: any, points: number[][], actualRank:number, actualRankPoints: number, futureRank:number): any {
   const data = transformInfo(originalInfo)
-  const result = calculateMeanStandarDeviation(data);
+  const result = calculateMeanStandardDeviation(data);
+  
+  const totalMatches = points.length;
+  const totalPoints = points.reduce((acc, row) => acc + row.reduce((accRow, punto) => accRow + punto, 0), 0);
+  const meanPoints = totalMatches > 0 ? totalPoints / totalMatches : 0;
+  let estimatedMatches: number = 0;
 
+  const promotionPoints = futureRank - actualRank - actualRankPoints;
+
+  if (actualRankPoints >= 85){
+    estimatedMatches = meanPoints > 0 ? Math.ceil((promotionPoints / meanPoints)*2.50) : 0;
+  }
+
+  else{
+    estimatedMatches = meanPoints > 0 ? Math.ceil((promotionPoints / meanPoints)*1.75) : 0;
+  }
+  console.log('partidas estimadas: ' + estimatedMatches)
+
+  
   if (result?.killData) {
-    const randomData = generateRandomData(result?.killData, result?.deathData, result?.assistData, result?.econData, result?.firstBloodData, result?.spikeData, result?.defusesData, data.kill.length);
-
+    const randomData = generateRandomData(result?.killData, result?.deathData, result?.assistData, result?.econData, result?.firstBloodData, result?.spikeData, result?.defusesData, estimatedMatches);
+    
     // predicción
 
     return new MLR(originalInfo, points).predict(randomData);
@@ -140,6 +157,29 @@ function calculatePoints(originalInfo: any, points: number[][]): any {
 
 }
 
+function calculateMatches(originalInfo: any, historicPoints: number[][], actualRank: number, actualRankPoints: any, futureRank: number): { matches: number, predictedPoints: { [key: string]: number }[] } {
+  const predictedPoints = calculatePoints(originalInfo, historicPoints, actualRank, actualRankPoints, futureRank)
+    .map(value => Math.round(value)); 
 
+  const neededPoints: number = futureRank - actualRank - actualRankPoints;
+  let sumTotal: number = 0;
+  let matches: number = 0;
+  const resultArray: { [key: string]: number }[] = [];
 
-export default calculatePoints;
+  for (let i in predictedPoints) {
+    sumTotal += predictedPoints[i];
+    const partida = `Partida${parseInt(i) + 1}`;
+    const partidaObj: { [key: string]: number } = {};
+    partidaObj[partida] = predictedPoints[i];
+    resultArray.push(partidaObj);
+
+    if (sumTotal >= neededPoints) {
+      matches = parseInt(i) + 1;
+      break;
+    }
+  }
+
+  return { matches, predictedPoints: resultArray };
+}
+
+export default calculateMatches;

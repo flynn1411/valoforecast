@@ -8,6 +8,7 @@
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
+  transition: 0.6ms all;
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
@@ -17,4 +18,40 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.hierro{
+  color: #5e5e5e;
+}
+
+.bronce{
+  color: #CD7F32;
+}
+
+.plata{
+  color: #c0c0c0;
+}
+
+.oro{
+  color: #FFD700;
+}
+
+.platino{
+  color: #3696a0;
+}
+
+.diamante{
+  color: #a572ef;
+}
+
+.ascendente{
+  color: #1a7447;
+}
+
+.inmortal{
+  color: #a03079;
+}
+
+.radiante{
+  color: #ffffcc;
 }

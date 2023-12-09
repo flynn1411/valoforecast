@@ -1,21 +1,18 @@
-import HomeButton from "../HomeButton";
-import Partida from "../../interfaces/Partida";
+import Partida from "../../interfaces/Partida"
 import { v4 as uuid } from "uuid";
 
-/*let listaDePartidas: Partida[] = [
+/*let currentMatches: Partida[] = [
   {kills: 15, deaths: 10, assists: 4, econ: 110, first_bloods: 2, defuses: 1, plants: 4, RR: 21, date: "24/11/2023"},
   {kills: 11, deaths: 16, assists: 2, econ: 240, first_bloods: 4, defuses: 3, plants: 3, RR: -11, date: "28/11/2023"}
 ]*/
 
-interface MatchesProps{
-  currentMatches: Partida[],
-  setCurrentMatches(arg0: Partida[]): any
+interface PredictedMatchesProps{
+  matches: Partida[]
 }
 
-function Matches({
-  currentMatches,
-  setCurrentMatches
-}:MatchesProps){
+function PredictedMatches(
+  {matches}:PredictedMatchesProps
+){
 
   function getColor(rr:number){
     if (rr >= 0){
@@ -28,9 +25,9 @@ function Matches({
   function renderMatches(){
     //console.log(listaDePartidas);
 
-    if (currentMatches.length > 0){
+    if (matches.length > 0){
 
-      return currentMatches.map((cPartida)=>{
+      return matches.map((cPartida)=>{
         return (
           <tr className={getColor(cPartida.RR)} key={uuid()} >
             <td><div className="font-medium text-center">{cPartida.date}</div></td>
@@ -56,10 +53,7 @@ function Matches({
   }
 
   return(
-    <div className="w-full h-full grid place-items-center">
-      <h1 className="font-titulo text-6xl">Datos Históricos</h1>
-      <div>
-        <table className="table-auto w-full font-ubuntu text-texto1 border-2 border-white">
+    <table className="table-auto w-full font-ubuntu text-texto1 border-2 border-white">
           <thead className="text-xs font-bold uppercase bg-texto1 text-header">
             <tr>
               <th className="p-2 whitespace-nowrap">
@@ -95,17 +89,7 @@ function Matches({
             {renderMatches()}
           </tbody>
         </table>
-      </div>
-      { currentMatches.length > 0 ? 
-        <button className="bg-verde text-fondo px-6 py-4 mb-6 font-titulo text-xl hover:bg-[#5ee7b2] w-[15vw]" onClick={()=>{
-          localStorage.removeItem("MATCHES");
-          setCurrentMatches([]);
-        }}>
-        Eliminar Históricos
-      </button>: "" }
-      <HomeButton/>
-    </div>
-  );
+  )
 }
 
-export default Matches;
+export default PredictedMatches;
