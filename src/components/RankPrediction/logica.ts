@@ -2,8 +2,21 @@ import * as math from 'mathjs';
 import * as jStat from 'jstat';
 import MLR from "ml-regression-multivariate-linear";
 
-
-function calculateMeanStandarDeviation(matchData: {
+/**
+ * Calcula la media y la desviación estándar de varios conjuntos de datos.
+ *
+ * @param {Object} matchData - Datos históricos de las partidas ingresadas por el jugador.
+ * @param {number[]} matchData.kill - Datos de kills.
+ * @param {number[]} matchData.deaths - Datos de deaths.
+ * @param {number[]} matchData.assists - Datos de assists.
+ * @param {number[]} matchData.econ - Datos de puntaje de economia.
+ * @param {number[]} matchData.firstBlood - Datos de firstBlood.
+ * @param {number[]} matchData.spikes - Datos de spikes(plantaciones).
+ * @param {number[]} matchData.defuses - Datos de defuses.
+ * @returns {Object|null} Un objeto con las medias y desviaciones estándar de cada conjunto de datos.
+ *                       Si alguno de los conjuntos de datos está vacío, devuelve null.
+ */
+function calculateMeanStandardDeviation(matchData: {
   kill: number[];
   deaths: number[];
   assists: number[];
@@ -85,6 +98,38 @@ function calculateMeanStandarDeviation(matchData: {
   };
 }
 
+
+
+
+
+/**
+ * Función que genera una matriz de datos aleatorios para ser usados en las predicciones del modelo.
+ * Los datos que se ingresan en esta función son los datos generados por la función calculateMeanStandardDeviation.
+ *
+ * @param {Object} killData - Objeto que contiene las estadísticas de la categoría "kill".
+ * @param {number} killData.killMean - Media de la categoría "kill".
+ * @param {number} killData.killStandardDeviation - Desviación estándar de la categoría "kill".
+ * @param {Object} deathData - Objeto que contiene las estadísticas de la categoría "deaths".
+ * @param {number} deathData.deathMean - Media de la categoría "deaths".
+ * @param {number} deathData.deathStandarDeviation - Desviación estándar de la categoría "deaths".
+ * @param {Object} assistData - Objeto que contiene las estadísticas de la categoría "assists".
+ * @param {number} assistData.assistMean - Media de la categoría "assists".
+ * @param {number} assistData.assistStandardDeviation - Desviación estándar de la categoría "assists".
+ * @param {Object} econData - Objeto que contiene las estadísticas de la categoría "econ".
+ * @param {number} econData.econMean - Media de la categoría "econ".
+ * @param {number} econData.econStandardDeviation - Desviación estándar de la categoría "econ".
+ * @param {Object} firstBloodData - Objeto que contiene las estadísticas de la categoría "firstBlood".
+ * @param {number} firstBloodData.firstBloodMean - Media de la categoría "firstBlood".
+ * @param {number} firstBloodData.firstBloodStandardDeviation - Desviación estándar de la categoría "firstBlood".
+ * @param {Object} spikeData - Objeto que contiene las estadísticas de la categoría "spikes"(plantaciones).
+ * @param {number} spikeData.spikeMean - Media de la categoría "spikes"(plantaciones).
+ * @param {number} spikeData.spikeStandardDeviation - Desviación estándar de la categoría "spikes"(plantaciones).
+ * @param {Object} defusesData - Objeto que contiene las estadísticas de la categoría "defuses".
+ * @param {number} defusesData.defusesMean - Media de la categoría "defuses".
+ * @param {number} defusesData.defusesStandardDeviation - Desviación estándar de la categoría "defuses".
+ * @param {number} rowNumber - Número de filas de datos aleatorios a generar.
+ * @returns {number[][]} Matriz de datos aleatorios generados con los datos estadísticos proporcionados anteriormente.
+ */
 function generateRandomData(
   killData: { killMean: number; killStandardDeviation: number },
   deathData: { deathMean: number; deathStandarDeviation: number },
@@ -96,7 +141,6 @@ function generateRandomData(
 ): number[][] {
   const generatedData: number[][] = [];
 
-  //const rowNumber = Object.keys();
   for (let i = 0; i < rowNumber; i++) {
     const filaGenerada: number[] = [
       Math.abs(Math.round(jStat.normal.inv(Math.random(), killData.killMean, killData.killStandardDeviation))),
@@ -114,23 +158,83 @@ function generateRandomData(
   return generatedData;
 }
 
-function transformInfo(info: any): any {
+
+
+
+/**
+ * Función que transforma la información proporciona por el usuario a un objeto como =>
+ * {
+    kill: [],
+    deaths: [],
+    assists: [],
+    econ: [],
+    firstBlood: [],
+    spikes: [],
+    defuses: [],
+  };
+ *
+ * @param {number[]} info - Datos históricos de partidas.
+ * @returns {Object} La información transformada
+ */
+function transformInfo(info: number[][]): {
+  kill: number[];
+  deaths: number[];
+  assists: number[];
+  econ: number[];
+  firstBlood: number[];
+  spikes: number[];
+  defuses: number[];
+} {
   const properties: string[] = ['kill', 'deaths', 'assists', 'econ', 'firstBlood', 'spikes', 'defuses'];
 
   const data: any = properties.reduce((acc: any, prop: string, index: number) => {
-    acc[prop] = info.map((partida: any) => partida[index]);
+    acc[prop] = info.map((partida: number[]) => partida[index]);
     return acc;
   }, {});
 
   return data;
 }
 
-function calculatePoints(originalInfo: any, points: number[][]): any {
+
+
+/**
+ * Funcion de soprte para la función calculateMatches. 
+ * Esta función recibe los puntos históricos proporcionados por el jugador, el rango actual, 
+ * puntaje actual y rango al que desea llegar. Con esto se hacen una serie de calculos que 
+ * se usan para estimar el numero de partidas a simular (usando los números aleatorios de la 
+ * función generateRandomData). Posteriormente esta infomacion se usa para construir el modelo 
+ * que estimará el desemepeño en esas partidas simuladas. 
+ *
+ * @param {any} originalInfo - Datos históricos de las partidas del jugador.
+ * @param {number[][]} points - Puntaje histórico que se obtuvo en las partidas que se ingresan.
+ * @param {number} actualRank - Rango actual.
+ * @param {number} actualRankPoints - Puntaje actual en el rango.
+ * @param {number} futureRank - Rango deseado.
+ * @returns {any} Estimación de puntos por partida según los datos ingresados y los simulados.
+ */
+function calculatePoints(originalInfo: any, points: number[][], actualRank: number, actualRankPoints: number, futureRank: number): any {
   const data = transformInfo(originalInfo)
-  const result = calculateMeanStandarDeviation(data);
+  const result = calculateMeanStandardDeviation(data);
+
+  const totalMatches = points.length;
+  const totalPoints = points.reduce((acc, row) => acc + row.reduce((accRow, punto) => accRow + punto, 0), 0);
+  const meanPoints = totalMatches > 0 ? totalPoints / totalMatches : 0;
+  let estimatedMatches: number = 0;
+
+  const promotionPoints = futureRank - actualRank - actualRankPoints;
+
+  if (actualRankPoints >= 85) {
+    estimatedMatches = meanPoints > 0 ? Math.ceil((promotionPoints / meanPoints) * 2.50) : 0;
+  }
+
+  else {
+    estimatedMatches = meanPoints > 0 ? Math.ceil((promotionPoints / meanPoints) * 1.75) : 0;
+  }
+  console.log('partidas estimadas: ' + estimatedMatches)
+
 
   if (result?.killData) {
-    const randomData = generateRandomData(result?.killData, result?.deathData, result?.assistData, result?.econData, result?.firstBloodData, result?.spikeData, result?.defusesData, data.kill.length);
+    const randomData = generateRandomData(result?.killData, result?.deathData, result?.assistData, result?.econData, result?.firstBloodData, result?.spikeData, result?.defusesData, estimatedMatches);
 
     // predicción
 
@@ -142,4 +246,41 @@ function calculatePoints(originalInfo: any, points: number[][]): any {
 
 
 
-export default calculatePoints;
+
+/**
+ * Funcion que calcula la cantidad de partidas necesarias para subir de rango. Recibe los 
+ * datos históricos proporcionados por el jugador, el puntaje histórico de partidas jugadas,
+ * el rango actual, puntaje actual y rango al que desea llegar. Con esto se hacen una serie de 
+ * calculos con la función calculatePoints para estimar los puntos por partida según los 
+ * datos ingresados y así estimar la cantidad de partidas.
+ *
+ * @param {number[][]} originalInfo - Datos históricos de las partidas del jugador.
+ * @param {number[][]} points - Puntaje histórico que se obtuvo en las partidas que se ingresan.
+ * @param {number} actualRank - Rango actual.
+ * @param {number} actualRankPoints - Puntaje actual en el rango.
+ * @param {number} futureRank - Rango deseado.
+ * @returns {number} Estimación de partidas a jugar para poder llegar al rango deseado
+ */
+function calculateMatches(originalInfo: number[][], points: number[][], actualRank: number, actualRankPoints: number, futureRank: number):number {
+  const predictedPoints = (calculatePoints(originalInfo, points, actualRank, actualRankPoints, futureRank));
+  //const cleanPredictedPoints = removeOutliers(predictedPoints)
+
+  const neededPoints: number = futureRank - actualRank - actualRankPoints;
+  let sumTotal: number = 0;
+  let matches: number = 0;
+  //console.log('puntos despues:' + cleanPredictedPoints)
+
+  for (let i in predictedPoints) {
+    sumTotal += parseInt(predictedPoints[i])
+
+    if (sumTotal >= neededPoints) {
+      matches = parseInt(i) + 1;
+      break;
+    }
+  }
+  return matches;
+}
+
+
+
+export default calculateMatches;
