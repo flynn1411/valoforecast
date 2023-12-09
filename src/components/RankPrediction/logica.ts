@@ -97,6 +97,11 @@ function calculateMeanStandardDeviation(matchData: {
     defusesData: { defusesMean, defusesStandardDeviation }
   };
 }
+
+
+
+
+
 /**
  * Función que genera una matriz de datos aleatorios para ser usados en las predicciones del modelo.
  * Los datos que se ingresan en esta función son los datos generados por la función calculateMeanStandardDeviation.
@@ -153,18 +158,52 @@ function generateRandomData(
   return generatedData;
 }
 
-function transformInfo(info: any): any {
+
+
+
+/**
+ * Función que transforma la información proporciona por el usuario a un objeto como =>
+ * {
+    kill: [],
+    deaths: [],
+    assists: [],
+    econ: [],
+    firstBlood: [],
+    spikes: [],
+    defuses: [],
+  };
+ *
+ * @param {number[]} info - Datos históricos de partidas.
+ * @returns {Object} La información transformada
+ */
+function transformInfo(info: number[][]): {
+  kill: number[];
+  deaths: number[];
+  assists: number[];
+  econ: number[];
+  firstBlood: number[];
+  spikes: number[];
+  defuses: number[];
+} {
   const properties: string[] = ['kill', 'deaths', 'assists', 'econ', 'firstBlood', 'spikes', 'defuses'];
 
   const data: any = properties.reduce((acc: any, prop: string, index: number) => {
-    acc[prop] = info.map((partida: any) => partida[index]);
+    acc[prop] = info.map((partida: number[]) => partida[index]);
     return acc;
   }, {});
 
   return data;
 }
+
+
+
 /**
- * Funcion de soprte para la función calculateMatches. Esta función recibe los puntos históricos proporcionados por el jugador,el rango actual, puntaje actual y rango al que desea llegar. Con esto se hacen una serie de calculos que se usan para estimar el numero de partidas a simular (usando los números aleatorios de la función generateRandomData). Posteriormente esta infomacion se usa para construir el modelo que estimará el desemepeño en esas partidas simuladas. 
+ * Funcion de soprte para la función calculateMatches. 
+ * Esta función recibe los puntos históricos proporcionados por el jugador, el rango actual, 
+ * puntaje actual y rango al que desea llegar. Con esto se hacen una serie de calculos que 
+ * se usan para estimar el numero de partidas a simular (usando los números aleatorios de la 
+ * función generateRandomData). Posteriormente esta infomacion se usa para construir el modelo 
+ * que estimará el desemepeño en esas partidas simuladas. 
  *
  * @param {any} originalInfo - Datos históricos de las partidas del jugador.
  * @param {number[][]} points - Puntaje histórico que se obtuvo en las partidas que se ingresan.
@@ -173,11 +212,10 @@ function transformInfo(info: any): any {
  * @param {number} futureRank - Rango deseado.
  * @returns {any} Estimación de puntos por partida según los datos ingresados y los simulados.
  */
-
-function calculatePoints(originalInfo: any, points: number[][], actualRank:number, actualRankPoints: number, futureRank:number): any {
+function calculatePoints(originalInfo: any, points: number[][], actualRank: number, actualRankPoints: number, futureRank: number): any {
   const data = transformInfo(originalInfo)
   const result = calculateMeanStandardDeviation(data);
-  
+
   const totalMatches = points.length;
   const totalPoints = points.reduce((acc, row) => acc + row.reduce((accRow, punto) => accRow + punto, 0), 0);
   const meanPoints = totalMatches > 0 ? totalPoints / totalMatches : 0;
@@ -185,19 +223,19 @@ function calculatePoints(originalInfo: any, points: number[][], actualRank:numbe
 
   const promotionPoints = futureRank - actualRank - actualRankPoints;
 
-  if (actualRankPoints >= 85){
-    estimatedMatches = meanPoints > 0 ? Math.ceil((promotionPoints / meanPoints)*2.50) : 0;
+  if (actualRankPoints >= 85) {
+    estimatedMatches = meanPoints > 0 ? Math.ceil((promotionPoints / meanPoints) * 2.50) : 0;
   }
 
-  else{
-    estimatedMatches = meanPoints > 0 ? Math.ceil((promotionPoints / meanPoints)*1.75) : 0;
+  else {
+    estimatedMatches = meanPoints > 0 ? Math.ceil((promotionPoints / meanPoints) * 1.75) : 0;
   }
   console.log('partidas estimadas: ' + estimatedMatches)
 
-  
+
   if (result?.killData) {
     const randomData = generateRandomData(result?.killData, result?.deathData, result?.assistData, result?.econData, result?.firstBloodData, result?.spikeData, result?.defusesData, estimatedMatches);
-    
+
     // predicción
 
     return new MLR(originalInfo, points).predict(randomData);
@@ -206,29 +244,43 @@ function calculatePoints(originalInfo: any, points: number[][], actualRank:numbe
 
 }
 
-function calculateMatches(originalInfo: any, historicPoints: number[][], actualRank:number, actualRankPoints: number, futureRank:number){
-  const predictedPoints = (calculatePoints(originalInfo, historicPoints, actualRank, actualRankPoints, futureRank));
+
+
+
+/**
+ * Funcion que calcula la cantidad de partidas necesarias para subir de rango. Recibe los 
+ * datos históricos proporcionados por el jugador, el puntaje histórico de partidas jugadas,
+ * el rango actual, puntaje actual y rango al que desea llegar. Con esto se hacen una serie de 
+ * calculos con la función calculatePoints para estimar los puntos por partida según los 
+ * datos ingresados y así estimar la cantidad de partidas.
+ *
+ * @param {number[][]} originalInfo - Datos históricos de las partidas del jugador.
+ * @param {number[][]} points - Puntaje histórico que se obtuvo en las partidas que se ingresan.
+ * @param {number} actualRank - Rango actual.
+ * @param {number} actualRankPoints - Puntaje actual en el rango.
+ * @param {number} futureRank - Rango deseado.
+ * @returns {number} Estimación de partidas a jugar para poder llegar al rango deseado
+ */
+function calculateMatches(originalInfo: number[][], points: number[][], actualRank: number, actualRankPoints: number, futureRank: number):number {
+  const predictedPoints = (calculatePoints(originalInfo, points, actualRank, actualRankPoints, futureRank));
   //const cleanPredictedPoints = removeOutliers(predictedPoints)
 
-  const neededPoints:number = futureRank - actualRank - actualRankPoints ;
-  let sumTotal:number = 0;
-  let matches:number = 0;
-  console.log('puntos antes:' +predictedPoints)
+  const neededPoints: number = futureRank - actualRank - actualRankPoints;
+  let sumTotal: number = 0;
+  let matches: number = 0;
   //console.log('puntos despues:' + cleanPredictedPoints)
 
   for (let i in predictedPoints) {
     sumTotal += parseInt(predictedPoints[i])
 
-    if (sumTotal>=neededPoints) {
-
-      matches = parseInt(i)+1;
+    if (sumTotal >= neededPoints) {
+      matches = parseInt(i) + 1;
       break;
     }
   }
-
-  
-  console.log(predictedPoints);
   return matches;
 }
+
+
 
 export default calculateMatches;
