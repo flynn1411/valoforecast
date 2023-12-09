@@ -2,8 +2,15 @@ import { Navigate, useNavigate } from "react-router-dom";
 import Partida from "../../interfaces/Partida";
 import HomeButton from "../HomeButton";
 
+interface MatchFormProps{
+  addMatch(param1: Partida): any
+}
 
-function MatchForm(){
+function MatchForm(
+  {
+    addMatch
+  }:MatchFormProps
+){
   const navigate = useNavigate();
 
   function addNewMatch(event: React.FormEvent<HTMLFormElement>){
@@ -21,16 +28,8 @@ function MatchForm(){
       date: `${event.currentTarget.date.value}`
     }
 
-    let matches: Partida[] = [];
-
-    if(localStorage.getItem("MATCHES")){
-      matches = JSON.parse(localStorage.getItem("MATCHES")!);
-    }
-
-    matches.push(newMatch);
-
-    localStorage.setItem("MATCHES", JSON.stringify(matches));
-
+    addMatch(newMatch);
+    
     alert("¡Partida subida con éxito!");
 
     navigate("/")
