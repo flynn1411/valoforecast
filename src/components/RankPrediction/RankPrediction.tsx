@@ -15,6 +15,11 @@ interface RankPredictionProps{
   matches: Partida[]
 }
 
+const defaultPred:Prediction ={
+  matches: 0,
+  predictedPoints:[{"1":0}]
+}
+
 function RankPrediction({
   currentRank,
   desiredRank,
@@ -46,7 +51,7 @@ function RankPrediction({
 
   const [mode, setMode] = useState<string>("TABLE");
   const navigate = useNavigate();
-  const [predictionCalcs, setPredictionCalcs] = useState<Prediction>();
+  const [predictionCalcs, setPredictionCalcs] = useState<Prediction>(defaultPred);
   /*let listaDePartidas: Partida[] = [
   {kills: 15, deaths: 10, assists: 4, econ: 110, first_bloods: 2, defuses: 1, plants: 4, RR: 21, date: "24/11/2023"},
   {kills: 11, deaths: 16, assists: 2, econ: 240, first_bloods: 4, defuses: 3, plants: 3, RR: -11, date: "28/11/2023"}
@@ -94,7 +99,7 @@ function RankPrediction({
         </ul>
       </div>
       <div className="pb-6">
-        {mode === "TABLE" ? <PredictedMatches matches={matches}/> : <GraphView/>}
+        {mode === "TABLE" ? <PredictedMatches matches={matches}/> : <GraphView predictedPoints={predictionCalcs?.predictedPoints}/>}
       </div>
       <table className="pt-4 pb-10">
         <tbody>

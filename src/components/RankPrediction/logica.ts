@@ -159,7 +159,7 @@ function calculatePoints(originalInfo: any, points: number[][], actualRank:numbe
 
 function calculateMatches(originalInfo: any, historicPoints: number[][], actualRank: number, actualRankPoints: any, futureRank: number): { matches: number, predictedPoints: { [key: string]: number }[] } {
   const predictedPoints = calculatePoints(originalInfo, historicPoints, actualRank, actualRankPoints, futureRank)
-    .map(value => Math.round(value)); 
+    .map((value: number) => Math.round(value)); 
 
   const neededPoints: number = futureRank - actualRank - actualRankPoints;
   let sumTotal: number = 0;
